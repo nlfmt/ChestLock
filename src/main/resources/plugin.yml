@@ -1,0 +1,17 @@
+name: ChestLock
+version: '${project.version}'
+main: avaze.chestlock.ChestLock
+api-version: 1.19
+authors: [ Avaze ]
+description: Lock your chests so nobody can steal from them!
+website: https://github.com/nlfmt
+commands:
+  chestlock:
+    description: Turn ChestLock on or off
+    usage: /<command> <on|off>
+  lock:
+    description: Lock the chest you're looking at
+    usage: /<command>
+  unlock:
+    description: Unlock the chest you're looking at
+    usage: /<command>
