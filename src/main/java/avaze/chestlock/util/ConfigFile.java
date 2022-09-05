@@ -68,7 +68,7 @@ public class ConfigFile extends YamlConfiguration {
                 // Get default config file from plugin resource folder
                 final InputStream defConfigStream = plugin.getResource(name);
                 if (defConfigStream == null) {
-                    System.err.println("ERROR: Plugin resource '" + name + "' not found.");
+                    plugin.getLogger().severe("ERROR: Plugin resource '" + name + "' not found.");
                     return;
                 }
                 setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, Charsets.UTF_8)));
@@ -82,9 +82,9 @@ public class ConfigFile extends YamlConfiguration {
             }
 
         } catch (IOException e) {
-            System.err.println("ERROR: Could not load config '" + name + "'");
+            plugin.getLogger().severe("ERROR: Could not load config '" + name + "'");
         } catch (InvalidConfigurationException e) {
-            System.err.println("ERROR: Invalid config in file '" + name + "'");
+            plugin.getLogger().severe("ERROR: Invalid config in file '" + name + "'");
         }
     }
 
@@ -104,7 +104,7 @@ public class ConfigFile extends YamlConfiguration {
         try {
             this.save(configFile);
         } catch (IOException e) {
-            System.err.println("ERROR: Could not save config '" + name + "'");
+            plugin.getLogger().severe("ERROR: Could not save config '" + name + "'");
         }
     }
 
@@ -114,15 +114,15 @@ public class ConfigFile extends YamlConfiguration {
      */
     public void reload() {
         if (type == Type.LOAD_ONLY) {
-            System.err.println("WARNING: Tried to reload config '" + name + "' with LOAD_ONLY config.");
+            plugin.getLogger().severe("WARNING: Tried to reload config '" + name + "' with LOAD_ONLY config.");
             return;
         }
         try {
             this.load(configFile);
         } catch (IOException e) {
-            System.err.println("ERROR: Could not load config '" + name + "'");
+            plugin.getLogger().severe("ERROR: Could not load config '" + name + "'");
         } catch (InvalidConfigurationException e) {
-            System.err.println("ERROR: Invalid config in file '" + name + "'");
+            plugin.getLogger().severe("ERROR: Invalid config in file '" + name + "'");
         }
     }
 
@@ -136,7 +136,7 @@ public class ConfigFile extends YamlConfiguration {
             try {
                 plugin.saveResource(name, false);
             } catch (Exception e) {
-                System.err.println("ERROR: Could not find resource '" + name + "'");
+                plugin.getLogger().severe("ERROR: Could not find resource '" + name + "'");
             }
         }
     }
@@ -147,7 +147,7 @@ public class ConfigFile extends YamlConfiguration {
     public void delete() {
         if (configFile.exists()) {
             boolean failed = !configFile.delete();
-            if (failed) System.err.println("ERROR: Could not delete config '" + name + "'");
+            if (failed) plugin.getLogger().severe("ERROR: Could not delete config '" + name + "'");
         }
     }
 }

@@ -14,13 +14,13 @@ public class Util {
     }
 
     public static boolean isLocked(Location l, Player p) {
-        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR) return false;
-        ConfigFile chests = new ConfigFile("chests");
+        if (p != null && (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR)) return false;
+        ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
         String owner = chests.getString(Util.serialize(l));
-        return (owner != null && !owner.equals(p.getName()));
+        return (owner != null && (p == null || !owner.equals(p.getName())));
     }
     public static String getOwner(Location l) {
-        ConfigFile chests = new ConfigFile("chests");
+        ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
         return chests.getString(Util.serialize(l));
     }
     public static boolean isLockable(Block b) {

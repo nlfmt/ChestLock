@@ -16,7 +16,7 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <url></url>
+    <url/>
 
     <build>
         <plugins>
@@ -50,7 +50,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <outputDirectory>D:/Documents/Minecraft/PaperServer/plugins</outputDirectory>
+                    <outputDirectory>C:/dev/minecraft/servers/PaperServer/plugins</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>

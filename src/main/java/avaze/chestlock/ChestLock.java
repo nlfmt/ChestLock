@@ -27,6 +27,9 @@ public final class ChestLock extends JavaPlugin {
 
         // TODO: lock double chest automatically
         // TODO: when a chest ist placed, check if it is connected to a locked chest and lock it if so or cancel it
+        // TODO: block hopper, hopper minecart
+        // TODO: block locked chests from being moved by pistons
+        // TODO: make sure chest cant burn, explode etc
     }
 
     @Override
