@@ -9,9 +9,21 @@ commands:
   chestlock:
     description: Turn ChestLock on or off
     usage: /<command> <on|off>
+    permission: minecraft.command.op
   lock:
     description: Lock the chest you're looking at
     usage: /<command>
   unlock:
     description: Unlock the chest you're looking at
     usage: /<command>
+  forcelock:
+    description: Lock the chest you're looking at even if its already locked
+    usage: /<command> <player>
+    permission: minecraft.command.op
+  forceunlock:
+    description: Unlock the chest you're looking at even if its locked by someone else
+    usage: /<command>
+    permission: minecraft.command.op
+  friend:
+    description: Add/Remove a player that can open your chests
+    usage: /<command> <add|remove|list> <player>
