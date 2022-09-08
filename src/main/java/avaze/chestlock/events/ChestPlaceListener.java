@@ -19,7 +19,7 @@ public class ChestPlaceListener implements Listener {
         Block b = e.getBlock();
 
         if (b.getState() instanceof Chest c) {
-            System.out.println("Chest placed at " + b.getLocation());
+            ChestLock.get().getLogger().info(e.getPlayer().getName() + " placed a chest at " + b.getLocation());
             Bukkit.getScheduler().runTaskLater(ChestLock.get(), () -> {
 
                 Chest otherChest = Util.getConnectedChest(c);

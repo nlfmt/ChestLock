@@ -3,6 +3,7 @@ package avaze.chestlock.events;
 import avaze.chestlock.ChestLock;
 import avaze.chestlock.util.ConfigFile;
 import avaze.chestlock.util.Util;
+import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -18,7 +19,7 @@ public class ChestOpenListener implements Listener {
             if (Util.isLockable(e.getClickedBlock())) {
                 if (Util.isLocked(e.getClickedBlock().getLocation(), e.getPlayer())) {
                     e.setCancelled(true);
-                    e.getPlayer().sendMessage("§cThis chest is owned by " + Util.getOwner(e.getClickedBlock().getLocation()) + "!");
+                    e.getPlayer().sendMessage("§cThis chest is owned by §f" + Util.getOwner(e.getClickedBlock().getLocation()) + "§c!");
                 }
             }
         }

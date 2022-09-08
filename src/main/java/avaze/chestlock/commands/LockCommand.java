@@ -22,19 +22,23 @@ public class LockCommand implements CommandExecutor {
         if (sender instanceof Player p) {
             try {
                 // Get the block the player is looking at
-                List<Block> blocks = p.getLineOfSight(null, 5);
-                Block b = blocks.get(blocks.size() - 1);
+//                List<Block> blocks = p.getLineOfSight(null, 5);
+//                Block b = blocks.get(blocks.size() - 1);
+                Block b = p.getTargetBlockExact(5);
 
-                if (!Util.isLockable(b)) throw new Exception();
+                if (b == null || !Util.isLockable(b)) throw new Exception();
 
                 ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
 
+                Chest chest = (Chest) b.getState();
                 Chest otherChestBlock = Util.getConnectedChest((Chest) b.getState());
                 Location otherChest = otherChestBlock != null ? otherChestBlock.getLocation() : null;
                 // Get Locations to lock
                 String loc = Util.serialize(b.getLocation());
                 String loc2 = otherChest == null ? null : Util.serialize(otherChest);
 
+
+                // #### LOCK ####
                 if (command.getName().equals("lock")) {
                     if (Util.isLocked(b.getLocation(), null)) {
                         String owner = Util.getOwner(b.getLocation());
@@ -42,9 +46,15 @@ public class LockCommand implements CommandExecutor {
                         return true;
                     }
                     Util.lock(p.getName(), loc, loc2);
+
+                    chest.setCustomName("§d§l" + p.getName() + "§r's Chest");
+                    chest.update();
+
                     sender.sendMessage("§aChest locked!");
                     ChestLock.get().getLogger().info(p.getName() + " locked chest at " + loc);
 
+
+                // #### UNLOCK ####
                 } else if (command.getName().equals("unlock")) {
                     if (chests.contains(loc)) {
                         String owner = chests.getString(loc);
@@ -53,6 +63,11 @@ public class LockCommand implements CommandExecutor {
                             return true;
                         }
                         Util.unlock(loc, loc2);
+
+                        // Reset names
+                        chest.setCustomName(null);
+                        chest.update();
+
                         sender.sendMessage("§aChest unlocked!");
                         ChestLock.get().getLogger().info(p.getName() + " unlocked a chest at " + loc);
                     } else {
@@ -60,15 +75,25 @@ public class LockCommand implements CommandExecutor {
                         return true;
                     }
 
+
+                // #### FORCE LOCK ####
                 } else if (command.getName().equals("forcelock") && p.isOp()) {
                     String playerName = args[0] == null ? p.getName() : args[0];
                     Util.lock(playerName, loc, loc2);
+
+                    chest.setCustomName("§d§l" + playerName + "§r's Chest");
+                    chest.update();
+
                     sender.sendMessage("§aChest locked!");
 
+
+                // #### FORCE UNLOCK ####
                 } else if (command.getName().equals("forceunlock") && p.isOp()) {
-                    chests.set(loc, null);
-                    if (loc2 != null) chests.set(loc2, null);
-                    chests.save();
+                    Util.unlock(loc, loc2);
+
+                    chest.setCustomName(null);
+                    chest.update();
+
                     sender.sendMessage("§aChest unlocked!");
                 }
 

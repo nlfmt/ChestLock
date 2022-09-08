@@ -4,6 +4,7 @@ import avaze.chestlock.ChestLock;
 import avaze.chestlock.util.ConfigFile;
 import avaze.chestlock.util.Util;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -26,8 +27,14 @@ public class ChestBreakListener implements Listener {
                 e.getPlayer().sendMessage("§cThis chest is owned by §f" + Util.getOwner(e.getBlock().getLocation()) + "§c!");
             } else {
                 ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
-                chests.set(Util.serialize(e.getBlock().getLocation()), null);
-                chests.save();
+                String loc = Util.serialize(e.getBlock().getLocation());
+                if (chests.getString(loc) != null) {
+                    chests.set(loc, null);
+                    chests.save();
+                    Chest c = (Chest) e.getBlock().getState();
+                    c.setCustomName(null);
+                    c.update();
+                }
             }
         }
     }

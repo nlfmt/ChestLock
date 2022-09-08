@@ -22,7 +22,6 @@ public class Util {
     public static Chest getConnectedChest(Chest c) {
         Inventory inv = c.getInventory();
         if (inv instanceof DoubleChestInventory dinv) {
-            System.out.println("chest is doublechest");
             DoubleChest d = dinv.getHolder();
 
             if (d==null) return null;
@@ -31,8 +30,6 @@ public class Util {
             if (leftChest == null || rightChest == null) return null;
             Location loc1 = leftChest.getLocation();
             Location loc2 = rightChest.getLocation();
-            System.out.println("loc1: " + Util.serialize(loc1));
-            System.out.println("loc2: " + Util.serialize(loc2));
             if (loc1.equals(c.getLocation())) {
                 return rightChest;
             } else {
