@@ -13,100 +13,99 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+@CommandInfo(name = "lock", requiresPlayer = true, aliases = {"unlock", "forcelock", "forceunlock"})
+public class LockCommand extends PluginCommand {
 
-public class LockCommand implements CommandExecutor {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public void execute(Player player, Command command, String[] args) {
 
-        if (sender instanceof Player p) {
-            try {
-                // Get the block the player is looking at
-//                List<Block> blocks = p.getLineOfSight(null, 5);
-//                Block b = blocks.get(blocks.size() - 1);
-                Block b = p.getTargetBlockExact(5);
+        try {
+            // Get the block the player is looking at
+            Block b = player.getTargetBlockExact(5);
+            if (b == null || !Util.isLockable(b)) throw new Exception();
 
-                if (b == null || !Util.isLockable(b)) throw new Exception();
-
-                ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
-
-                Chest chest = (Chest) b.getState();
-                Chest otherChestBlock = Util.getConnectedChest((Chest) b.getState());
-                Location otherChest = otherChestBlock != null ? otherChestBlock.getLocation() : null;
-                // Get Locations to lock
-                String loc = Util.serialize(b.getLocation());
-                String loc2 = otherChest == null ? null : Util.serialize(otherChest);
+            Chest chest = (Chest) b.getState();
+            Chest otherChestBlock = Util.getConnectedChest((Chest) b.getState());
+            // Get Locations to lock
+            Location loc = b.getLocation();
+            Location loc2 = otherChestBlock != null ? otherChestBlock.getLocation() : null;
 
 
-                // #### LOCK ####
-                if (command.getName().equals("lock")) {
-                    if (Util.isLocked(b.getLocation(), null)) {
-                        String owner = Util.getOwner(b.getLocation());
-                        p.sendMessage("§cThis chest is already locked by §f" + owner);
-                        return true;
+            // #### LOCK ####
+            if (command.getName().equals("lock")) {
+                if (Util.isLocked(b.getLocation(), null)) {
+                    String owner = Util.getOwner(b.getLocation());
+                    player.sendMessage("§cThis chest is already locked by §f" + owner);
+                    Util.playFailSound(player);
+                    return;
+                }
+                Util.lock(player.getName(), loc, loc2);
+
+                chest.setCustomName("§d§l" + player.getName() + "§r's Chest");
+                chest.update();
+
+                player.sendMessage("§aChest locked!");
+                Util.playSuccessSound(player);
+                ChestLock.get().getLogger().info(player.getName() + " locked chest at " + loc);
+
+
+            // #### UNLOCK ####
+            } else if (command.getName().equals("unlock")) {
+                if (Util.isLocked(loc, null)) {
+                    if (Util.isLocked(loc, player)) {
+                        player.sendMessage("§cThis chest was locked by §f" + Util.getOwner(loc));
+                        Util.playFailSound(player);
+                        return;
                     }
-                    Util.lock(p.getName(), loc, loc2);
-
-                    chest.setCustomName("§d§l" + p.getName() + "§r's Chest");
-                    chest.update();
-
-                    sender.sendMessage("§aChest locked!");
-                    ChestLock.get().getLogger().info(p.getName() + " locked chest at " + loc);
-
-
-                // #### UNLOCK ####
-                } else if (command.getName().equals("unlock")) {
-                    if (chests.contains(loc)) {
-                        String owner = chests.getString(loc);
-                        if (owner == null || !owner.equals(p.getName())) {
-                            p.sendMessage("§cThis chest was locked by §f" + owner);
-                            return true;
-                        }
-                        Util.unlock(loc, loc2);
-
-                        // Reset names
-                        chest.setCustomName(null);
-                        chest.update();
-
-                        sender.sendMessage("§aChest unlocked!");
-                        ChestLock.get().getLogger().info(p.getName() + " unlocked a chest at " + loc);
-                    } else {
-                        sender.sendMessage("§cChest is not locked!");
-                        return true;
-                    }
-
-
-                // #### FORCE LOCK ####
-                } else if (command.getName().equals("forcelock") && p.isOp()) {
-                    String playerName = args[0] == null ? p.getName() : args[0];
-                    Util.lock(playerName, loc, loc2);
-
-                    chest.setCustomName("§d§l" + playerName + "§r's Chest");
-                    chest.update();
-
-                    sender.sendMessage("§aChest locked!");
-
-
-                // #### FORCE UNLOCK ####
-                } else if (command.getName().equals("forceunlock") && p.isOp()) {
                     Util.unlock(loc, loc2);
 
+                    // Reset names
                     chest.setCustomName(null);
                     chest.update();
+                    if (otherChestBlock != null) {
+                        otherChestBlock.setCustomName(null);
+                        otherChestBlock.update();
+                    }
 
-                    sender.sendMessage("§aChest unlocked!");
+                    player.sendMessage("§aChest unlocked!");
+                    Util.playSuccessSound(player);
+                    ChestLock.get().getLogger().info(player.getName() + " unlocked a chest at " + loc);
+                } else {
+                    player.sendMessage("§cChest is not locked!");
+                    Util.playFailSound(player);
                 }
 
-            } catch (NullPointerException e) {
-                sender.sendMessage("§cSomething went wrong :/");
-                e.printStackTrace();
-                return true;
-            } catch (Exception e) {
-                sender.sendMessage("§cYou are not looking at a chest!");
-                return true;
-            }
-        }
 
-        return true;
+            // #### FORCE LOCK ####
+            } else if (command.getName().equals("forcelock") && player.isOp()) {
+                String playerName = args[0] == null ? player.getName() : args[0];
+                Util.lock(playerName, loc, loc2);
+
+                chest.setCustomName("§d§l" + playerName + "§r's Chest");
+                chest.update();
+
+                player.sendMessage("§aChest locked!");
+                Util.playSuccessSound(player);
+
+
+            // #### FORCE UNLOCK ####
+            } else if (command.getName().equals("forceunlock") && player.isOp()) {
+                Util.unlock(loc, loc2);
+
+                chest.setCustomName(null);
+                chest.update();
+
+                player.sendMessage("§aChest unlocked!");
+                Util.playSuccessSound(player);
+            }
+
+        } catch (NullPointerException e) {
+            player.sendMessage("§cSomething went wrong :/");
+            Util.playFailSound(player);
+            e.printStackTrace();
+        } catch (Exception e) {
+            player.sendMessage("§cYou are not looking at a chest!");
+            Util.playFailSound(player);
+        }
     }
 }

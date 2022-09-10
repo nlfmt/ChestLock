@@ -25,16 +25,15 @@ public class ChestBreakListener implements Listener {
             if (Util.isLocked(e.getBlock().getLocation(), e.getPlayer())) {
                 e.setCancelled(true);
                 e.getPlayer().sendMessage("§cThis chest is owned by §f" + Util.getOwner(e.getBlock().getLocation()) + "§c!");
+                Util.playDisallowedSound(e.getPlayer());
             } else {
                 ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
-                String loc = Util.serialize(e.getBlock().getLocation());
-                if (chests.getString(loc) != null) {
-                    chests.set(loc, null);
-                    chests.save();
-                    Chest c = (Chest) e.getBlock().getState();
-                    c.setCustomName(null);
-                    c.update();
-                }
+                Util.unlock(e.getBlock().getLocation());
+                Chest c = (Chest) e.getBlock().getState();
+                // Change name back to normal so the dropped chest has the correct name
+                c.setCustomName(null);
+                c.update();
+                ChestLock.get().getLogger().info(e.getPlayer().getName() + " broke his locked chest at " + Util.serialize(e.getBlock().getLocation()));
             }
         }
     }

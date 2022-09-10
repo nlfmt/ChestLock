@@ -1,9 +1,7 @@
 package avaze.chestlock.util;
 
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import avaze.chestlock.ChestLock;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
@@ -14,9 +12,26 @@ import org.bukkit.inventory.Inventory;
 import javax.annotation.Nullable;
 
 public class Util {
+
     public static String serialize(Location l) {
         World world = l.getWorld();
         return (world == null ? "<unknown_world>" : world.getName()) + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
+    }
+
+    public static void playFailSound(Player p) {
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.8f, 1f);
+        Bukkit.getScheduler().runTaskLater(ChestLock.get(),
+                () -> p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.8f, 0.9f), 3L);
+    }
+
+    public static void playSuccessSound(Player p) {
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.8f, 1f);
+        Bukkit.getScheduler().runTaskLater(ChestLock.get(),
+                () -> p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.8f, 1.5f), 3L);
+    }
+
+    public static void playDisallowedSound(Player p) {
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.8f, 0.5f);
     }
 
     public static Chest getConnectedChest(Chest c) {
@@ -60,14 +75,14 @@ public class Util {
         return (b.getType() == Material.CHEST || b.getType() == Material.TRAPPED_CHEST);
     }
 
-    public static void lock( @Nullable String playerName, String... locs) {
+    public static void lock( @Nullable String playerName, Location... locs) {
         ConfigFile chests = new ConfigFile("chests", ConfigFile.Type.SAVE_ONLY);
-        for (String loc : locs) {
-            if (loc != null) chests.set(loc, playerName);
+        for (Location loc : locs) {
+            if (loc != null) chests.set(Util.serialize(loc), playerName);
         }
         chests.save();
     }
-    public static void unlock(String... locs) {
+    public static void unlock(Location... locs) {
         lock(null, locs);
     }
 }

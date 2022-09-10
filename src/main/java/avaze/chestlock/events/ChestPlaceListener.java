@@ -25,9 +25,15 @@ public class ChestPlaceListener implements Listener {
                 Chest otherChest = Util.getConnectedChest(c);
                 if (otherChest == null) return;
 
+                if (!Util.isLocked(otherChest.getLocation(), null)) return;
 
-                if (Util.isLocked(otherChest.getLocation(), e.getPlayer())) {
+                if (!Util.isLocked(otherChest.getLocation(), e.getPlayer())) {
+                    // Chest is locked, but we can access it, lock the placed chest
+                    String otherOwner = Util.getOwner(otherChest.getBlock().getLocation());
+                    Util.lock(otherOwner, b.getLocation());
 
+                } else {
+                    // Chest is locked, and we can't access it, disconnect the chests
                     Block rightSide = otherChest.getBlock();
 
                     BlockData leftData = b.getBlockData();
@@ -40,6 +46,9 @@ public class ChestPlaceListener implements Listener {
                     org.bukkit.block.data.type.Chest chestDataRight = (org.bukkit.block.data.type.Chest) rightData;
                     chestDataRight.setType(org.bukkit.block.data.type.Chest.Type.SINGLE);
                     rightSide.setBlockData(chestDataRight);
+
+                    Util.playDisallowedSound(e.getPlayer());
+                    e.getPlayer().sendMessage("§c Can't connect to someone else's locked chest!");
                 }
 
             }, 1);

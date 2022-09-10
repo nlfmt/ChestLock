@@ -1,18 +1,20 @@
 package avaze.chestlock.commands;
 
 import avaze.chestlock.ChestLock;
+import avaze.chestlock.util.Util;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class ChestLockCommand implements CommandExecutor {
+@CommandInfo(name = "chestlock", requiresPlayer = false)
+public class ChestLockCommand extends PluginCommand {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public void execute(CommandSender sender, Command command, String[] args) {
 
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /chestlock <on|off>");
-            return true;
+            return;
         }
 
         if (args[0].equals("on")) {
@@ -24,7 +26,5 @@ public class ChestLockCommand implements CommandExecutor {
         } else {
             sender.sendMessage("§cUsage: /chestlock <on|off>");
         }
-
-        return true;
     }
 }

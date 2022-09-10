@@ -3,13 +3,19 @@ package avaze.chestlock;
 import avaze.chestlock.commands.FriendCommand;
 import avaze.chestlock.commands.LockCommand;
 import avaze.chestlock.commands.ChestLockCommand;
+import avaze.chestlock.commands.PluginCommand;
 import avaze.chestlock.events.ChestBreakListener;
 import avaze.chestlock.events.ChestOpenListener;
 import avaze.chestlock.events.ChestPlaceListener;
 import avaze.chestlock.events.ItemMoveListener;
 import avaze.chestlock.util.ConfigFile;
+import avaze.chestlock.util.Util;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.reflections.Reflections;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 public final class ChestLock extends JavaPlugin {
@@ -28,20 +34,28 @@ public final class ChestLock extends JavaPlugin {
         saveDefaultConfig();
         ChestLock.enabled = getConfig().getBoolean("enabled");
 
-        Objects.requireNonNull(getCommand("lock")).setExecutor(new LockCommand());
-        Objects.requireNonNull(getCommand("unlock")).setExecutor(new LockCommand());
-        Objects.requireNonNull(getCommand("forcelock")).setExecutor(new LockCommand());
-        Objects.requireNonNull(getCommand("forceunlock")).setExecutor(new LockCommand());
-        Objects.requireNonNull(getCommand("friend")).setExecutor(new FriendCommand());
-        Objects.requireNonNull(getCommand("chestlock")).setExecutor(new ChestLockCommand());
+        String packageName = getClass().getPackage().getName();
 
-        getServer().getPluginManager().registerEvents(new ChestBreakListener(), this);
-        getServer().getPluginManager().registerEvents(new ChestOpenListener(), this);
-        getServer().getPluginManager().registerEvents(new ChestPlaceListener(), this);
-        getServer().getPluginManager().registerEvents(new ItemMoveListener(), this);
+        for (Class<?> clazz : new Reflections(packageName + ".commands").getSubTypesOf(PluginCommand.class)) {
+            try {
+                PluginCommand command = (PluginCommand) clazz.getDeclaredConstructor().newInstance();
+                Objects.requireNonNull(getCommand(command.getCommandInfo().name())).setExecutor(command);
+                for (String alias : command.getCommandInfo().aliases()) {
+                    Objects.requireNonNull(getCommand(alias)).setExecutor(command);
+                }
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-
-        // TODO: block hopper, hopper minecart
+        for (Class<?> clazz : new Reflections(packageName + ".events").getSubTypesOf(Listener.class)) {
+            try {
+                Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
+                getServer().getPluginManager().registerEvents(listener, this);
+            } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override

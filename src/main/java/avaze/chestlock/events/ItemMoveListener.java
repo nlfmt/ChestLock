@@ -12,6 +12,7 @@ public class ItemMoveListener implements Listener {
     @EventHandler
     public void onItemMove(InventoryMoveItemEvent e) {
         if (!ChestLock.enabled) return;
+        // Don't transfer items out of locked chests
         if (e.getSource().getHolder() instanceof Chest c) {
             if (Util.isLocked(c.getBlock().getLocation(), null)) {
                 e.setCancelled(true);
